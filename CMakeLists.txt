@@ -1,15 +1,44 @@
-cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
-
+cmake_minimum_required(VERSION 3.0.2 FATAL_ERROR)
 project(surfelwarp)
 
-# Add cmake module path
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+## Compile as C++11, supported in ROS Kinetic and newer
+# add_compile_options(-std=c++11)
+
 
 # Language options
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Cuda
+## Find catkin macros and libraries
+## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
+## is used, also find other catkin packages
+find_package(catkin REQUIRED COMPONENTS
+	)
+
+
+## System dependencies are found with CMake's conventions
+# find_package(Boost REQUIRED COMPONENTS system)
+
+###################################
+## catkin specific configuration ##
+###################################
+## The catkin_package macro generates cmake config files for your package
+## Declare things to be passed to dependent projects
+## INCLUDE_DIRS: uncomment this if your package contains header files
+## LIBRARIES: libraries you create in this project that dependent projects also need
+## CATKIN_DEPENDS: catkin_packages dependent projects also need
+## DEPENDS: system dependencies of this project that dependent projects also need
+catkin_package(
+#  INCLUDE_DIRS include
+#  LIBRARIES datasets_thesis
+#  CATKIN_DEPENDS other_catkin_pkg
+#  DEPENDS system_lib
+)
+
+#######################
+## Setup CUDA folder ##
+#######################
+
 find_package(CUDA 9 REQUIRED)
 include_directories(${CUDA_INCLUDE_DIRS})
 set(CUDA_ARCH "50 through 61" CACHE STRING "Architecture(s) for which to generate CUDA PTX code")
@@ -28,49 +57,38 @@ else()
     set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -gencode=arch=compute_${CUDA_ARCH},code=sm_${CUDA_ARCH}")
 endif()
 
-# GLFW package
+
+##################
+## GLWF Package ##
+##################
+
 find_package(glfw3 REQUIRED)
 
 
-# The library and compiler flags on Windows
-if(MSVC)
-    option( MSVC_USE_STATIC_CRT  "Use static C Runtime with MSVC, /MT instead of /MD" ON)
 
-    # Make sure there are no erroneous C Runtime flags
-    list(APPEND FLAG_VARS
-        CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO
-        CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELWITHDEBINFO
-    )
-    if(MSVC_USE_STATIC_CRT)
-        foreach(FLAG_VAR ${FLAG_VARS})
-            string(REGEX REPLACE "/MD" "/MT" NEW_FLAGS "${${FLAG_VAR}}")
-            set(${FLAG_VAR} "${NEW_FLAGS}" CACHE STRING "" FORCE)
-        endforeach()
-    else()
-        foreach(FLAG_VAR ${FLAG_VARS})
-            string(REGEX REPLACE "/MT" "/MD" NEW_FLAGS "${${FLAG_VAR}}")
-            set(${FLAG_VAR} "${NEW_FLAGS}" CACHE STRING "" FORCE)
-        endforeach()
-    endif()
+###########################
+## Ubuntu Compiler flags ##
+###########################
 
-	# Provisions for typical Boost compiled on Windows
-    # Most commonly, Boost libraries are compiled statically on windows (change as necesssary)
-    set(Boost_USE_STATIC_LIBS TRUE)
-	if(MSVC_USE_STATIC_CRT)
-		set(Boost_USE_STATIC_RUNTIME ON)
-	else()
-		set(Boost_USE_STATIC_RUNTIME OFF)
-	endif()
-	set(Boost_USE_MULTITHREADED ON)
-	set(Boost_USE_DEBUG_RUNTIME ON)
-	set(Boost_USE_DEBUG_PYTHON OFF)
-endif(MSVC)
-# The library and compiler flags on Ubuntu
 if(UNIX)
     #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
     set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -g -G")
 endif(UNIX)
+
+
+
+###########
+## Build ##
+###########
+
+## Specify additional locations of header files
+## Your package locations should be listed before other locations
+include_directories(
+# include
+${catkin_INCLUDE_DIRS}
+)
+
 
 # Append "d" to library versions with debugging symbols
 set(CMAKE_DEBUG_POSTFIX d)
@@ -83,21 +101,9 @@ set(EIGEN_INCLUDE_DIR ${EIGEN_ROOT})
 set(CUB_DIR "${CMAKE_SOURCE_DIR}/external/cub-1.8.0")
 include_directories(${CUB_DIR})
 
-# Point cloud library and a series / cilantro
-
-
-set(VISUALIZATION_LIBRARY "PCL" CACHE STRING "Which library to use for visualization")
-set_property(CACHE VISUALIZATION_LIBRARY PROPERTY STRINGS "PCL" "cilantro")
-if(VISUALIZATION_LIBRARY STREQUAL "PCL")
-    find_package(PCL REQUIRED)
-    include_directories(${PCL_INCLUDE_DIRS})
-    add_definitions(-DWITH_PCL)
-elseif(VISUALIZATION_LIBRARY STREQUAL "cilantro")
-    find_package(cilantro REQUIRED)
-    include_directories(${cilantro_INCLUDE_DIRS})
-    add_definitions(-DWITH_CILANTRO)
-endif()
-
+find_package(PCL REQUIRED)
+include_directories(${PCL_INCLUDE_DIRS})
+add_definitions(-DWITH_PCL)
 
 # Check the CUDA version and resolve confliction with pcl
 if(${CUDA_VERSION_MAJOR} LESS 11)
@@ -129,10 +135,12 @@ include_directories(${Boost_INCLUDE_DIRS})
 include_directories("${CMAKE_SOURCE_DIR}")
 include_directories("${CMAKE_SOURCE_DIR}/external")
 
+
 # The external library
 add_subdirectory(external)
 
-# The libraries
+
+#Library subdirectories
 add_subdirectory(common)
 add_subdirectory(math)
 add_subdirectory(pcg_solver)
@@ -140,9 +148,91 @@ add_subdirectory(imgproc)
 add_subdirectory(visualization)
 add_subdirectory(core)
 
-
-# The hashing libaray should not depends on PCL
+# The hashing libary should not depends on PCL
 add_subdirectory(hashing)
+
 
 # Applications
 add_subdirectory(apps)
+
+
+## Declare a C++ library
+# add_library(${PROJECT_NAME}
+#   src/${PROJECT_NAME}/datasets_thesis.cpp
+# )
+
+## Add cmake target dependencies of the library
+## as an example, code may need to be generated before libraries
+## either from message generation or dynamic reconfigure
+# add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+## Declare a C++ executable
+## With catkin_make all packages are built within a single CMake context
+## The recommended prefix ensures that target names across packages don't collide
+# add_executable(${PROJECT_NAME}_node src/datasets_thesis_node.cpp)
+
+## Rename C++ executable without prefix
+## The above recommended prefix causes long target names, the following renames the
+## target back to the shorter version for ease of user use
+## e.g. "rosrun someones_pkg node" instead of "rosrun someones_pkg someones_pkg_node"
+# set_target_properties(${PROJECT_NAME}_node PROPERTIES OUTPUT_NAME node PREFIX "")
+
+## Add cmake target dependencies of the executable
+## same as for the library above
+# add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+## Specify libraries to link a library or executable target against
+# target_link_libraries(${PROJECT_NAME}_node
+#   ${catkin_LIBRARIES}
+# )
+
+#############
+## Install ##
+#############
+
+# all install targets should use catkin DESTINATION variables
+# See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html
+
+
+
+
+## Mark executables for installation
+## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_executables.html
+# install(TARGETS ${PROJECT_NAME}_node
+#   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+# )
+
+## Mark libraries for installation
+## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_libraries.html
+# install(TARGETS ${PROJECT_NAME}
+#   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+#   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+#   RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
+# )
+
+## Mark cpp header files for installation
+# install(DIRECTORY include/${PROJECT_NAME}/
+#   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+#   FILES_MATCHING PATTERN "*.h"
+#   PATTERN ".svn" EXCLUDE
+# )
+
+## Mark other files for installation (e.g. launch and bag files, etc.)
+# install(FILES
+#   # myfile1
+#   # myfile2
+#   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+# )
+
+#############
+## Testing ##
+#############
+
+## Add gtest based cpp test target and link libraries
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_datasets_thesis.cpp)
+# if(TARGET ${PROJECT_NAME}-test)
+#   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
+# endif()
+
+## Add folders to be run by python nosetests
+# catkin_add_nosetests(test/test_code.py)

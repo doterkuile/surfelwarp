@@ -58,3 +58,9 @@ cmake-build*
 
 # the result directory
 *results/*
+
+# The windows application
+test_data/binary/*
+
+# Sintel small speed
+test_data/sintel_small_speed*

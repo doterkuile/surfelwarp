@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+  <arg name="dataset"  default="no_data"/>
+
+
+
+  <param name="project_dir" type="string" value="$(find datasets_thesis)"/>
+
+  <param name="config_file" type="string" value="$(find datasets_thesis)/datasets/$(arg dataset)_config.json"/>
+
+  <rosparam command="load" file="$(find datasets_thesis)/config/dataset_config.yaml" />
+  <node 
+  	pkg="datasets_thesis" 
+  	name="dataset_generator" 
+  	type="dataset_generator" 
+  	output="screen">
+  	<param name="dataset" type="string" value="$(arg dataset)"/>
+  </node> 
+
+
+</launch>
