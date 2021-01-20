@@ -12,7 +12,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS
+find_package(catkin REQUIRED COMPONENTS roscpp
 	)
 
 
@@ -29,9 +29,9 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES datasets_thesis
-#  CATKIN_DEPENDS other_catkin_pkg
+ # INCLUDE_DIRS include
+ LIBRARIES surfelwarp
+ CATKIN_DEPENDS roscpp
 #  DEPENDS system_lib
 )
 
@@ -56,6 +56,8 @@ else()
     set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -arch=sm_${CUDA_ARCH}")
     set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -gencode=arch=compute_${CUDA_ARCH},code=sm_${CUDA_ARCH}")
 endif()
+
+set(CUDA_VERBOSE_BUILD ON CACHE BOOL "nvcc verbose" FORCE)
 
 
 ##################

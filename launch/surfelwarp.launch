@@ -10,11 +10,10 @@
 
   <rosparam command="load" file="$(find datasets_thesis)/config/dataset_config.yaml" />
   <node 
-  	pkg="datasets_thesis" 
-  	name="dataset_generator" 
-  	type="dataset_generator" 
+  	pkg="surfelwarp" 
+  	name="surfelwarp_app" 
+  	type="surfelwarp_app" 
   	output="screen">
-  	<param name="dataset" type="string" value="$(arg dataset)"/>
   </node> 
 
 

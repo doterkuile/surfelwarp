@@ -6,34 +6,36 @@
 #include "common/ConfigParser.h"
 #include "core/SurfelWarpSerial.h"
 #include <boost/filesystem.hpp>
+#include <ros/ros.h>
 
 int main(int argc, char** argv) {
-	using namespace surfelwarp;
-	
+//    ros::NodeHandle
+    ros::init(argc, argv, "SurfelWarp");
+    ros::NodeHandle nh;
+
+
 	//Get the config path
+    std::string default_config_path = "/home/david/project_thesis/src/surfelwarp/test_data/boxing_config.json";
 	std::string config_path;
-	if (argc <= 1) {
-#if defined(WIN32)
-		config_path = "C:/Users/wei/Documents/Visual Studio 2015/Projects/surfelwarp/test_data/boxing_config.json";
-#else
-		config_path = "/home/wei/Documents/programs/surfelwarp/test_data/boxing_config.json";
-#endif
-	} else {
-		config_path = std::string(argv[1]);
-	}
+    nh.param("config_file", config_path, default_config_path);
+//	if (argc <= 1) {
+
+//	} else {
+//		config_path = std::string(argv[1]);
+//	}
 
 	//Parse it
-	auto& config = ConfigParser::Instance();
+    auto& config = surfelwarp::ConfigParser::Instance();
 	config.ParseConfig(config_path);
 
 	//The context
-	//auto context = initCudaContext();
+//	auto context = surfelwarp::initCudaContext();
 
 	//Save offline
 	bool offline_rendering = true;
 
 	//The processing loop
-	SurfelWarpSerial fusion;
+    surfelwarp::SurfelWarpSerial fusion;
 
 	fusion.ProcessFirstFrame();
 	for(auto i = 0; i < config.num_frames(); i++){

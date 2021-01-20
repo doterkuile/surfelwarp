@@ -49,7 +49,9 @@ void surfelwarp::Renderer::initGLFW() {
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	
 	//Defualt framebuffer properties
-	glfwWindowHint(GLFW_VISIBLE, GL_FALSE);
+//	glfwWindowHint(GLFW_VISIBLE, GL_FALSE);
+    glfwWindowHint(GLFW_VISIBLE, GL_TRUE);
+
 	glfwWindowHint(GLFW_SAMPLES, 1);
 	glfwWindowHint(GLFW_STEREO, GL_FALSE);
 	glfwWindowHint(GLFW_DOUBLEBUFFER, GL_TRUE);
