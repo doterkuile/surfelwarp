@@ -2,6 +2,8 @@
 // Created by wei on 3/29/18.
 //
 
+
+
 #pragma once
 
 #include "common/Constants.h"
@@ -24,10 +26,20 @@
 
 #include <boost/filesystem.hpp>
 
+// ROS headers
+#include <ros/ros.h>
+
+
+
 namespace surfelwarp {
 	
 	class SurfelWarpSerial {
 	private:
+
+        //ROS components
+        ros::NodeHandle m_nh;
+        ros::Publisher m_pub_cloud;
+
 		//The primary components
 		ImageProcessor::Ptr m_image_processor;
 		Renderer::Ptr m_renderer;
@@ -64,7 +76,7 @@ namespace surfelwarp {
 		
 	public:
 		using Ptr = std::shared_ptr<SurfelWarpSerial>;
-		SurfelWarpSerial();
+        SurfelWarpSerial(ros::NodeHandle &nh);
 		~SurfelWarpSerial();
 		SURFELWARP_NO_COPY_ASSIGN_MOVE(SurfelWarpSerial);
 		

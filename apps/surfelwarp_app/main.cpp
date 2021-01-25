@@ -6,9 +6,12 @@
 #include "common/ConfigParser.h"
 #include "core/SurfelWarpSerial.h"
 #include <boost/filesystem.hpp>
+//#include <pcl_ros/point_cloud.h>
+#include <ros/ros.h>
 
 int main(int argc, char** argv) {
 	using namespace surfelwarp;
+    ros::NodeHandle nh;
 	
 	//Get the config path
 	std::string config_path;
@@ -33,7 +36,7 @@ int main(int argc, char** argv) {
 	bool offline_rendering = true;
 
 	//The processing loop
-	SurfelWarpSerial fusion;
+    SurfelWarpSerial fusion(nh);
 
 	fusion.ProcessFirstFrame();
 	for(auto i = 0; i < config.num_frames(); i++){

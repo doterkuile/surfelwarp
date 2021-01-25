@@ -13,8 +13,14 @@
 
 #include <thread>
 #include <fstream>
+#include <pcl_ros/point_cloud.h>
 
-surfelwarp::SurfelWarpSerial::SurfelWarpSerial() {
+surfelwarp::SurfelWarpSerial::SurfelWarpSerial(ros::NodeHandle &nh):
+m_nh(nh)
+{
+
+    m_pub_cloud = nh.advertise<pcl::PointCloud<pcl::PointXYZ>>("topic",1);
+
 	//The config is assumed to be updated
 	const auto& config = ConfigParser::Instance();
 	
@@ -22,7 +28,7 @@ surfelwarp::SurfelWarpSerial::SurfelWarpSerial() {
 	FetchInterface::Ptr fetcher = std::make_shared<GenericFileFetch>(config.data_path());
 	m_image_processor = std::make_shared<ImageProcessor>(fetcher);
 	
-	//Construct the holder for surfel geometry
+    //Construct the holder for surfel geometry
 	m_surfel_geometry[0] = std::make_shared<SurfelGeometry>();
 	m_surfel_geometry[1] = std::make_shared<SurfelGeometry>();
 	m_live_geometry_updater = std::make_shared<LiveGeometryUpdater>(m_surfel_geometry);

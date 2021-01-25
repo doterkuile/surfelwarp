@@ -12,7 +12,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS
+find_package(catkin REQUIRED COMPONENTS roscpp pcl_ros
 	)
 
 
@@ -30,8 +30,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES datasets_thesis
-#  CATKIN_DEPENDS other_catkin_pkg
+ LIBRARIES surfelwarp
+ CATKIN_DEPENDS roscpp pcl_ros
 #  DEPENDS system_lib
 )
 
