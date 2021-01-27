@@ -23,11 +23,19 @@
 #include "core/warp_solver/RigidSolver.h"
 
 #include <boost/filesystem.hpp>
+#include <ros/ros.h>
+//#include <pcl/io/pcd_io.h>
+//#include <pcl/point_types.h>
+#include <pcl/filters/voxel_grid.h>
 
 namespace surfelwarp {
 	
 	class SurfelWarpSerial {
 	private:
+
+        ros::NodeHandle m_nh;
+        ros::Publisher m_pub_cloud;
+
 		//The primary components
 		ImageProcessor::Ptr m_image_processor;
 		Renderer::Ptr m_renderer;
@@ -64,7 +72,7 @@ namespace surfelwarp {
 		
 	public:
 		using Ptr = std::shared_ptr<SurfelWarpSerial>;
-		SurfelWarpSerial();
+        SurfelWarpSerial(ros::NodeHandle &nh);
 		~SurfelWarpSerial();
 		SURFELWARP_NO_COPY_ASSIGN_MOVE(SurfelWarpSerial);
 		

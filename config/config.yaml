@@ -1,0 +1,3 @@
+pointcloud_topic: "surfel_cloud"
+pointcloud_frame: "point_cloud_frame"
+voxel_filter_size: "100"

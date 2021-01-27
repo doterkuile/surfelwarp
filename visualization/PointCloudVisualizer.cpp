@@ -286,7 +286,7 @@ void surfelwarp::Visualizer::SaveColoredPointCloud(const PointCloud3fRGB_Pointer
     std::ofstream file_output;
     file_output.open(path);
     const auto &points = point_cloud->points;
-
+    std::cout << "in savecoloredpointcloud" << '\n';
     file_output << "COFF" << std::endl;
     file_output << points.size() << " " << 0 << " " << 0 << std::endl;
     for (auto i = 0; i < points.size(); i++) {

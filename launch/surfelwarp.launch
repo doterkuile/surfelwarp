@@ -1,20 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <launch>
   <arg name="dataset"  default="no_data"/>
+  <arg name="debug"    default="false" />
 
 
 
   <param name="project_dir" type="string" value="$(find datasets_thesis)"/>
 
-  <param name="config_file" type="string" value="$(find datasets_thesis)/datasets/$(arg dataset)_config.json"/>
+  <param name="dataset_config_file" type="string" value="$(find datasets_thesis)/datasets/$(arg dataset)_config.json"/>
+  <rosparam command="load" file="$(find surfelwarp)/config/config.yaml"/>
 
-  <rosparam command="load" file="$(find datasets_thesis)/config/dataset_config.yaml" />
-  <node 
-  	pkg="surfelwarp" 
-  	name="surfelwarp_app" 
-  	type="surfelwarp_app" 
-  	output="screen">
-  </node> 
+  <node pkg="tf" type="static_transform_publisher" name="surfel_link_broadcaster" args="1 0 0 0 0 0 1 map point_cloud_frame 100" />
+
+  <group unless="$(arg debug)" >
+
+      <node
+      	pkg="surfelwarp" 
+      	name="surfelwarp_app" 
+      	type="surfelwarp_app" 
+      	output="screen">
+      </node> 
+  </group>
 
 
 </launch>

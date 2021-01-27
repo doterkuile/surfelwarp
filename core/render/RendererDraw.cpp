@@ -188,8 +188,8 @@ void surfelwarp::Renderer::drawVisualizationMap(
 	glBindVertexArray(geometry_vao);
 
 	//The size is image rows/cols
-//    glBindFramebuffer(GL_FRAMEBUFFER, m_visualization_draw_buffers.visualization_map_fbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, m_visualization_draw_buffers.visualization_map_fbo);
+//    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	glViewport(0, 0, m_image_width, m_image_height);
 

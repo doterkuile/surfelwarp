@@ -13,13 +13,25 @@
 
 #include <thread>
 #include <fstream>
+#include <pcl_ros/point_cloud.h>
+#include <pcl_conversions/pcl_conversions.h>
 
-surfelwarp::SurfelWarpSerial::SurfelWarpSerial() {
+
+surfelwarp::SurfelWarpSerial::SurfelWarpSerial(ros::NodeHandle &nh):
+m_nh(nh)
+{
+    std::string pointcloud_topic;
+    m_nh.param("pointcloud_topic", pointcloud_topic, std::string("surfel_pointcloud"));
+
+
+    m_pub_cloud = m_nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>(pointcloud_topic, 1);
+
+
 	//The config is assumed to be updated
-	const auto& config = ConfigParser::Instance();
+    const auto& dataset_config = ConfigParser::Instance();
 	
 	//Construct the image processor
-	FetchInterface::Ptr fetcher = std::make_shared<GenericFileFetch>(config.data_path());
+    FetchInterface::Ptr fetcher = std::make_shared<GenericFileFetch>(dataset_config.data_path());
 	m_image_processor = std::make_shared<ImageProcessor>(fetcher);
 	
 	//Construct the holder for surfel geometry
@@ -37,7 +49,7 @@ surfelwarp::SurfelWarpSerial::SurfelWarpSerial() {
 	m_reference_knn_skinner = ReferenceNodeSkinner::Instance();
 	
 	//Construct the renderer
-	m_renderer = std::make_shared<Renderer>(config.clip_image_rows(), config.clip_image_cols());
+    m_renderer = std::make_shared<Renderer>(dataset_config.clip_image_rows(), dataset_config.clip_image_cols());
 	
 	//Map the resource into geometry
 	m_renderer->MapSurfelGeometryToCuda(0, *(m_surfel_geometry[0]));
@@ -57,13 +69,13 @@ surfelwarp::SurfelWarpSerial::SurfelWarpSerial() {
 	m_geometry_reinit_processor = std::make_shared<GeometryReinitProcessor>(m_surfel_geometry);
 	
 	//The frame index
-	m_frame_idx = config.start_frame_idx();
+    m_frame_idx = dataset_config.start_frame_idx();
 	m_reinit_frame_idx = m_frame_idx;
 }
 
 surfelwarp::SurfelWarpSerial::~SurfelWarpSerial() {
 	//Release the explicit allocated buffer
-	m_warp_solver->ReleaseBuffer();
+    m_warp_solver->ReleaseBuffer();
 	m_geometry_initializer->ReleaseBuffer();
 }
 
@@ -168,6 +180,48 @@ void surfelwarp::SurfelWarpSerial::ProcessNextFrameWithReinit(bool offline_save)
 	//Map the fusion map to cuda
 	Renderer::FusionMaps fusion_maps;
 	m_renderer->MapFusionMapsToCuda(fusion_maps);
+
+
+    // Publish cloud
+    float leaf_size;
+
+    m_nh.param("/voxel_filter_size", leaf_size, float(0.01));
+    std::cout << "voxel filter size = " << leaf_size << '\n';
+
+
+    auto cloud = downloadColoredPointCloud(fusion_maps.warp_vertex_map, fusion_maps.color_time_map, true);
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_filtered (new pcl::PointCloud<pcl::PointXYZRGB>);
+    pcl::VoxelGrid<pcl::PointXYZRGB> sor;
+
+    std::string frame_id;
+    std::string default_frame = "surfel_frame";
+    m_nh.param("pointcloud_frame", frame_id, default_frame);
+    cloud_filtered->header.frame_id = frame_id;
+    cloud->header.frame_id = frame_id;
+
+    for (unsigned int i = 0; i < cloud->size(); ++i) {
+        auto& point = cloud->points[i];
+        point.x = point.x/1000.0;
+        point.y = point.y/1000.0;
+        point.z = point.z/1000,0;
+    }
+    pcl_conversions::toPCL(ros::Time::now(),cloud->header.stamp);
+    pcl_conversions::toPCL(ros::Time::now(),cloud_filtered->header.stamp);
+
+
+
+    sor.setInputCloud(cloud);
+    sor.setLeafSize(leaf_size, leaf_size, leaf_size);
+
+    std::cout << "point size before: " << cloud->points.size() << '\n';
+    sor.filter(*cloud_filtered);
+
+    std::cout << "point size after filter: " << cloud_filtered->points.size() << '\n';
+
+//    cloud->header.stamp = ros::Time::now();
+
+    m_pub_cloud.publish(*cloud);
+
 	//Map both maps to surfelwarp as they are both required
 	m_renderer->MapSurfelGeometryToCuda(0);
 	m_renderer->MapSurfelGeometryToCuda(1);
