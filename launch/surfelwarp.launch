@@ -10,7 +10,7 @@
   <param name="dataset_config_file" type="string" value="$(find datasets_thesis)/datasets/$(arg dataset)_config.json"/>
   <rosparam command="load" file="$(find surfelwarp)/config/config.yaml"/>
 
-  <node pkg="tf" type="static_transform_publisher" name="surfel_link_broadcaster" args="1 0 0 0 0 0 1 map point_cloud_frame 100" />
+  <node pkg="tf" type="static_transform_publisher" name="surfel_link_broadcaster" args="1 0 0 0.71, 0, 0, 0.71 map point_cloud_frame 100" />
 
   <group unless="$(arg debug)" >
 

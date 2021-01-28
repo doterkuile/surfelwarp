@@ -73,9 +73,16 @@ find_package(glfw3 REQUIRED)
 ###########################
 
 if(UNIX)
-    #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
-    set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -g -G")
+    if(CMAKE_BUILD_TYPE STREQUAL "Release")
+        message("release type")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -Wall")
+        set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} --use_fast_math")
+    else()
+        message("debug type")
+        #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
+        set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -g -G")
+    endif()
 endif(UNIX)
 
 
