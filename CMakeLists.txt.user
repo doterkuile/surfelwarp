@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.5.2, 2021-01-20T14:31:13. -->
+<!-- Written by QtCreator 4.5.2, 2021-01-29T10:48:13. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -71,7 +71,7 @@
      <value type="QString">CMAKE_CXX_COMPILER:FILEPATH=/usr/bin/c++</value>
      <value type="QString">CMAKE_C_COMPILER:FILEPATH=/usr/bin/cc</value>
     </valuelist>
-    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">/home/david/thesis_project/build/surfelwarp</value>
+    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">/home/david/thesis_project/build_debug/surfelwarp</value>
     <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
       <value type="QString" key="CMakeProjectManager.MakeStep.AdditionalArguments"></value>
@@ -92,7 +92,7 @@
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
       <value type="QString" key="CMakeProjectManager.MakeStep.AdditionalArguments"></value>
       <valuelist type="QVariantList" key="CMakeProjectManager.MakeStep.BuildTargets">
-       <value type="QString">clean</value>
+       <value type="QString">all</value>
       </valuelist>
       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">CMake Build</value>

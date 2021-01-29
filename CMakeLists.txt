@@ -105,6 +105,8 @@ set(CMAKE_DEBUG_POSTFIX d)
 # Do not use the system Eigen
 set(EIGEN_ROOT "${CMAKE_SOURCE_DIR}/external/eigen3.4")
 set(EIGEN_INCLUDE_DIR ${EIGEN_ROOT})
+include_directories(${EIGEN_INCLUDE_DIR})
+
 ## remove an error due to dynamic construciton of eigen vector
 add_definitions(-DEIGEN_DISABLE_UNALIGNED_ARRAY_ASSERT) 
 

@@ -79,6 +79,55 @@ surfelwarp::SurfelWarpSerial::~SurfelWarpSerial() {
 	m_geometry_initializer->ReleaseBuffer();
 }
 
+
+void surfelwarp::SurfelWarpSerial::publishPointCloud(cudaTextureObject_t &vertex_map, cudaTextureObject_t &color_map, ros::Publisher &pub_cloud, bool downsampling)
+{
+    // Initialize variables
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_filtered (new pcl::PointCloud<pcl::PointXYZRGB>);
+    float leaf_size;
+    std::string frame_id;
+    std::string default_frame = "surfel_frame";
+
+    // Get relevant parameters
+    m_nh.param("/voxel_filter_size", leaf_size, float(0.01));
+    m_nh.param("pointcloud_frame", frame_id, default_frame);
+
+    // Get pointcloud
+    auto cloud = downloadColoredPointCloud(vertex_map, color_map, true);
+
+    // Set units from mm to m
+    for (unsigned int i = 0; i < cloud->size(); ++i) {
+        auto& point = cloud->points[i];
+        point.x = point.x/1000.0;
+        point.y = point.y/1000.0;
+        point.z = point.z/1000,0;
+        }
+
+    // Use voxelfilter if downsampling is enabled
+    if(downsampling)
+    {
+    pcl::VoxelGrid<pcl::PointXYZRGB> sor;
+
+    sor.setInputCloud(cloud);
+    sor.setLeafSize(leaf_size, leaf_size, leaf_size);
+
+    sor.filter(*cloud_filtered);
+
+    } else{
+    cloud_filtered = cloud;
+
+    }
+
+    // Setup header information
+    cloud_filtered->header.frame_id = frame_id;
+    pcl_conversions::toPCL(ros::Time::now(),cloud_filtered->header.stamp);
+
+    // Publish point cloud
+    m_pub_cloud.publish(*cloud_filtered);
+    return;
+}
+
+
 /* The processing interface
  */
 void surfelwarp::SurfelWarpSerial::ProcessFirstFrame() {
@@ -182,45 +231,9 @@ void surfelwarp::SurfelWarpSerial::ProcessNextFrameWithReinit(bool offline_save)
 	m_renderer->MapFusionMapsToCuda(fusion_maps);
 
 
-    // Publish cloud
-    float leaf_size;
-
-    m_nh.param("/voxel_filter_size", leaf_size, float(0.01));
-    std::cout << "voxel filter size = " << leaf_size << '\n';
-
-
-    auto cloud = downloadColoredPointCloud(fusion_maps.warp_vertex_map, fusion_maps.color_time_map, true);
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_filtered (new pcl::PointCloud<pcl::PointXYZRGB>);
-    pcl::VoxelGrid<pcl::PointXYZRGB> sor;
-
-    std::string frame_id;
-    std::string default_frame = "surfel_frame";
-    m_nh.param("pointcloud_frame", frame_id, default_frame);
-    cloud_filtered->header.frame_id = frame_id;
-    cloud->header.frame_id = frame_id;
-
-    for (unsigned int i = 0; i < cloud->size(); ++i) {
-        auto& point = cloud->points[i];
-        point.x = point.x/1000.0;
-        point.y = point.y/1000.0;
-        point.z = point.z/1000,0;
-    }
-    pcl_conversions::toPCL(ros::Time::now(),cloud->header.stamp);
-    pcl_conversions::toPCL(ros::Time::now(),cloud_filtered->header.stamp);
-
-
-
-    sor.setInputCloud(cloud);
-    sor.setLeafSize(leaf_size, leaf_size, leaf_size);
-
-    std::cout << "point size before: " << cloud->points.size() << '\n';
-    sor.filter(*cloud_filtered);
-
-    std::cout << "point size after filter: " << cloud_filtered->points.size() << '\n';
-
-//    cloud->header.stamp = ros::Time::now();
-
-    m_pub_cloud.publish(*cloud);
+    bool use_downsample_filter = false;
+    // Publish pointcloud
+    this->publishPointCloud(fusion_maps.warp_vertex_map, fusion_maps.color_time_map, m_pub_cloud, use_downsample_filter);
 
 	//Map both maps to surfelwarp as they are both required
 	m_renderer->MapSurfelGeometryToCuda(0);

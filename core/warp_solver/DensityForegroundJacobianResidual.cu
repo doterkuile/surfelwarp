@@ -9,6 +9,7 @@
 #include "core/warp_solver/DensityForegroundMapHandler.h"
 #include "core/warp_solver/density_map_jacobian.cuh"
 #include <device_launch_parameters.h>
+#include <ros/ros.h>
 
 /* Compute the gradient of density map and foreground mask
  */
@@ -189,7 +190,8 @@ void surfelwarp::DensityForegroundMapHandler::computeForegroundMaskTwistGradient
 	
 	//If the size is zero, just return
 	if(m_valid_mask_pixel.ArraySize() == 0) {
-		LOG(INFO) << "There is no foreground pixel";
+        ROS_WARN_STREAM(">>>> There is no foreground pixel");
+//		LOG(INFO) << "There is no foreground pixel";
 		return;
 	}
 	

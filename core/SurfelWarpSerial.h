@@ -125,6 +125,10 @@ namespace surfelwarp {
 		bool shouldDoIntegration() const;
 		bool shouldDoReinit() const;
 		bool shouldDrawRecentObservation() const;
+
+        //Ros based functions
+        //Publish point cloud
+        void publishPointCloud(cudaTextureObject_t &vertex_map, cudaTextureObject_t &color_map, ros::Publisher &pub_cloud, bool downsampling=true);
 	};
 	
 }

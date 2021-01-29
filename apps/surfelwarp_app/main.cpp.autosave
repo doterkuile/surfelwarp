@@ -7,7 +7,6 @@
 #include "common/TimeLogger.h"
 #include "core/SurfelWarpSerial.h"
 #include <boost/filesystem.hpp>
-#include <ros/console.h>
 
 int main(int argc, char** argv) {
 
